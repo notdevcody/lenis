@@ -2,6 +2,7 @@ package org.lwjgl.util.glu;
 
 import org.lwjgl.opengl.Util;
 
+import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 
@@ -154,6 +155,14 @@ public class GLU {
 
     public static boolean gluCheckExtension(String extName, String extString) {
         return Registry.gluCheckExtension(extName, extString);
+    }
+
+    public static int gluBuild2DMipmaps(int target, int components, int width, int height, int format, int type, ByteBuffer data) {
+        return MipMap.gluBuild2DMipmaps(target, components, width, height, format, type, data);
+    }
+
+    public static int gluScaleImage(int format, int widthIn, int heightIn, int typeIn, ByteBuffer dataIn, int widthOut, int heightOut, int typeOut, ByteBuffer dataOut) {
+        return MipMap.gluScaleImage(format, widthIn, heightIn, typeIn, dataIn, widthOut, heightOut, typeOut, dataOut);
     }
 
     public static String gluErrorString(int error_code) {
