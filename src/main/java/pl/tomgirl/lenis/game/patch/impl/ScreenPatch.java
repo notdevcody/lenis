@@ -51,16 +51,17 @@ public final class ScreenPatch extends Patch {
                 ClipboardMethod patch = methods.get(new Method(name, descriptor));
                 if (patch == null) return super.visitMethod(access, name, descriptor, signature, exceptions);
                 MethodVisitor method = super.visitMethod(access, name, descriptor, signature, exceptions);
+                int argumentSlot = (access & Opcodes.ACC_STATIC) != 0 ? 0 : 1;
                 method.visitCode();
                 if (patch == ClipboardMethod.GET) {
                     method.visitMethodInsn(Opcodes.INVOKESTATIC, HOOKS, "getClipboard", "()Ljava/lang/String;", false);
                     method.visitInsn(Opcodes.ARETURN);
                 } else {
-                    method.visitVarInsn(Opcodes.ALOAD, 0);
+                    method.visitVarInsn(Opcodes.ALOAD, argumentSlot);
                     method.visitMethodInsn(Opcodes.INVOKESTATIC, HOOKS, "setClipboard", "(Ljava/lang/String;)V", false);
                     method.visitInsn(Opcodes.RETURN);
                 }
-                method.visitMaxs(1, patch == ClipboardMethod.GET ? 0 : 1);
+                method.visitMaxs(1, argumentSlot + (patch == ClipboardMethod.GET ? 0 : 1));
                 method.visitEnd();
                 return null;
             }
