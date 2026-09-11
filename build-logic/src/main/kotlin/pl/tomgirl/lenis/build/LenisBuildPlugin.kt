@@ -1,7 +1,6 @@
 package pl.tomgirl.lenis.build
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.gradle.api.JavaVersion
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.artifacts.VersionCatalogsExtension
@@ -11,6 +10,7 @@ import org.gradle.api.publish.PublishingExtension
 import org.gradle.api.publish.maven.MavenPublication
 import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.api.tasks.bundling.Jar
+import org.gradle.api.tasks.compile.JavaCompile
 import org.gradle.kotlin.dsl.*
 import org.gradle.language.jvm.tasks.ProcessResources
 
@@ -42,6 +42,12 @@ class LenisBuildPlugin : Plugin<Project> {
         configurations.named(fabric.runtimeOnlyConfigurationName) {
             extendsFrom(configurations.getByName("runtimeOnly"))
         }
+        val launchwrapper = sourceSets.create("launchwrapper")
+        val forge = sourceSets.create("forge") {
+            compileClasspath += main.get().output + launchwrapper.output +
+                configurations.getByName("compileClasspath")
+            runtimeClasspath += output + compileClasspath
+        }
         val bakedPatches = sourceSets.create("bakedPatches") {
             java.srcDir(rootProject.layout.projectDirectory.dir("build-logic/src/baked-patches/java"))
             compileClasspath += main.get().output + configurations.getByName("compileClasspath")
@@ -49,9 +55,12 @@ class LenisBuildPlugin : Plugin<Project> {
         }
 
         extensions.configure<JavaPluginExtension> {
-            sourceCompatibility = JavaVersion.VERSION_21
-            targetCompatibility = JavaVersion.VERSION_21
             withSourcesJar()
+        }
+
+        tasks.withType<JavaCompile>().configureEach {
+            options.release.set(8)
+            options.compilerArgs.add("-Xlint:-options")
         }
 
         group = providers.gradleProperty("maven_group").get()
@@ -83,11 +92,14 @@ class LenisBuildPlugin : Plugin<Project> {
         }
 
         tasks.named<Jar>("jar") {
-            dependsOn(fabric.classesTaskName)
-            from(fabric.output)
+            dependsOn(fabric.classesTaskName, forge.classesTaskName)
+            from(fabric.output, forge.output)
             archiveClassifier.set("slim")
             destinationDirectory.set(layout.buildDirectory.dir("intermediates"))
-            manifest.attributes["Premain-Class"] = "pl.tomgirl.lenis.Agent"
+            manifest.attributes(
+                "Premain-Class" to "pl.tomgirl.lenis.Agent",
+                "TweakClass" to "pl.tomgirl.lenis.forge.LenisTweaker",
+            )
         }
 
         val shadowJar = tasks.named<ShadowJar>("shadowJar") {
@@ -100,15 +112,16 @@ class LenisBuildPlugin : Plugin<Project> {
         }
 
         val unpatchedJar = tasks.register<Jar>("unpatchedJar") {
-            dependsOn(shadowJar, fabric.classesTaskName)
+            dependsOn(shadowJar, fabric.classesTaskName, forge.classesTaskName)
             from(shadowJar.flatMap { it.archiveFile }.map { zipTree(it.asFile) }) {
                 exclude("META-INF/MANIFEST.MF")
             }
-            from(fabric.output)
+            from(fabric.output, forge.output)
             archiveClassifier.set("unpatched")
             destinationDirectory.set(layout.buildDirectory.dir("intermediates"))
             manifest.attributes(
                 "Premain-Class" to "pl.tomgirl.lenis.Agent",
+                "TweakClass" to "pl.tomgirl.lenis.forge.LenisTweaker",
                 "Multi-Release" to "true",
             )
         }
@@ -134,7 +147,7 @@ class LenisBuildPlugin : Plugin<Project> {
         artifacts.add(distribution.name, distributionFile) { builtBy(bakeLwjgl) }
         tasks.named("assemble") { dependsOn(bakeLwjgl) }
         tasks.named<Jar>("sourcesJar") {
-            from(fabric.allSource)
+            from(fabric.allSource, forge.allSource, launchwrapper.allSource)
         }
 
         extensions.configure<PublishingExtension> {

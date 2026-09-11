@@ -152,14 +152,21 @@ public class MouseSdl {
 
     public void processMouseEvent(SDL_Event event) {
         switch (event.type()) {
-            case SDL_EVENT_MOUSE_BUTTON_UP, SDL_EVENT_MOUSE_BUTTON_DOWN -> {
+            case SDL_EVENT_MOUSE_BUTTON_UP:
+            case SDL_EVENT_MOUSE_BUTTON_DOWN: {
                 boolean down = buttonEvent.down();
                 long timestamp = buttonEvent.timestamp();
-                byte button = switch (buttonEvent.button()) {
-                    case SDL_BUTTON_RIGHT -> 1;
-                    case SDL_BUTTON_MIDDLE -> 2;
-                    default -> (byte) (buttonEvent.button() - 1);
-                };
+                byte button;
+                switch (buttonEvent.button()) {
+                    case SDL_BUTTON_RIGHT:
+                        button = 1;
+                        break;
+                    case SDL_BUTTON_MIDDLE:
+                        button = 2;
+                        break;
+                    default:
+                        button = (byte) (buttonEvent.button() - 1);
+                }
 
                 if (grabbed) {
                     putMouseEvent(button, down, 0, timestamp);
@@ -176,8 +183,9 @@ public class MouseSdl {
                 if (button >= 0 && button < buttonStates.length) {
                     buttonStates[button] = down;
                 }
+                break;
             }
-            case SDL_EVENT_MOUSE_WHEEL -> {
+            case SDL_EVENT_MOUSE_WHEEL: {
                 int yOffset = wheelEvent.integer_y();
                 if (yOffset == 0) {
                     break;
@@ -195,8 +203,9 @@ public class MouseSdl {
                         wheelEvent.timestamp()
                     );
                 }
+                break;
             }
-            case SDL_EVENT_MOUSE_MOTION -> {
+            case SDL_EVENT_MOUSE_MOTION: {
                 double x = toLwjglX(motionEvent.x());
                 double y = toLwjglY(motionEvent.y());
                 double dx = motionEvent.xrel() * scaleX();
@@ -213,9 +222,14 @@ public class MouseSdl {
                         putMouseMotionEvent(x, y, nanos);
                     }
                 }
+                break;
             }
-            case SDL_EVENT_WINDOW_MOUSE_ENTER -> insideWindow = true;
-            case SDL_EVENT_WINDOW_MOUSE_LEAVE -> insideWindow = false;
+            case SDL_EVENT_WINDOW_MOUSE_ENTER:
+                insideWindow = true;
+                break;
+            case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+                insideWindow = false;
+                break;
         }
     }
 

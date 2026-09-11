@@ -41,6 +41,13 @@ public class Mouse {
     private static double lastRawEventY;
     private static long eventNanos;
 
+    // compatibility fields
+    // shout out to a mod which sets these w/ reflection
+    private static int x;
+    private static int y;
+    private static int event_x;
+    private static int event_y;
+
     private Mouse() {}
 
     private static void checkCreated() {
@@ -50,7 +57,7 @@ public class Mouse {
     }
 
     private static double clamp(double coordinate, int displaySize) {
-        return Math.clamp(coordinate, 0, displaySize - 1);
+        return Math.max(0, Math.min(coordinate, displaySize - 1));
     }
 
     private static void initialize() {

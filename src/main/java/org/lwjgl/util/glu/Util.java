@@ -31,13 +31,27 @@ public class Util {
     }
 
     protected static int compPerPix(int format) {
-        return switch (format) {
-            case GL_COLOR_INDEX, GL_STENCIL_INDEX, GL_DEPTH_COMPONENT, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA, GL_LUMINANCE -> 1;
-            case GL_LUMINANCE_ALPHA -> 2;
-            case GL_RGB, GL_BGR -> 3;
-            case GL_RGBA, GL_BGRA -> 4;
-            default -> -1;
-        };
+        switch (format) {
+            case GL_COLOR_INDEX:
+            case GL_STENCIL_INDEX:
+            case GL_DEPTH_COMPONENT:
+            case GL_RED:
+            case GL_GREEN:
+            case GL_BLUE:
+            case GL_ALPHA:
+            case GL_LUMINANCE:
+                return 1;
+            case GL_LUMINANCE_ALPHA:
+                return 2;
+            case GL_RGB:
+            case GL_BGR:
+                return 3;
+            case GL_RGBA:
+            case GL_BGRA:
+                return 4;
+            default:
+                return -1;
+        }
     }
 
     protected static int nearestPower(int value) {
@@ -58,20 +72,27 @@ public class Util {
     }
 
     protected static int bytesPerPixel(int format, int type) {
-        int n = switch (format) {
-            case GL_COLOR_INDEX, GL_STENCIL_INDEX, GL_DEPTH_COMPONENT, GL_RED, GL_GREEN, GL_BLUE, GL_ALPHA, GL_LUMINANCE -> 1;
-            case GL_LUMINANCE_ALPHA -> 2;
-            case GL_RGB, GL_BGR -> 3;
-            case GL_RGBA, GL_BGRA -> 4;
-            default -> 0;
-        };
+        int n = Math.max(compPerPix(format), 0);
 
-        int m = switch (type) {
-            case GL_UNSIGNED_BYTE, GL_BITMAP, GL_BYTE -> 1;
-            case GL_UNSIGNED_SHORT, GL_SHORT -> 2;
-            case GL_UNSIGNED_INT, GL_FLOAT, GL_INT -> 4;
-            default -> 0;
-        };
+        int m;
+        switch (type) {
+            case GL_UNSIGNED_BYTE:
+            case GL_BITMAP:
+            case GL_BYTE:
+                m = 1;
+                break;
+            case GL_UNSIGNED_SHORT:
+            case GL_SHORT:
+                m = 2;
+                break;
+            case GL_UNSIGNED_INT:
+            case GL_FLOAT:
+            case GL_INT:
+                m = 4;
+                break;
+            default:
+                m = 0;
+        }
 
         return n * m;
     }

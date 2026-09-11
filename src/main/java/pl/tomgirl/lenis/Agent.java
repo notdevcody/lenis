@@ -2,13 +2,14 @@ package pl.tomgirl.lenis;
 
 import java.io.File;
 import java.lang.instrument.Instrumentation;
+import java.util.logging.Level;
 
 public final class Agent {
     private Agent() {}
 
     public static void premain(String arguments, Instrumentation instrumentation) {
         if (injectFabric()) {
-            Lenis.LOG.log(System.Logger.Level.INFO, "Injected Fabric mod");
+            Lenis.LOG.log(Level.INFO, "Injected Fabric mod");
             return;
         }
 
@@ -31,7 +32,7 @@ public final class Agent {
             return true;
         } catch (Exception e) {
             if (!(e instanceof ClassNotFoundException)) {
-                Lenis.LOG.log(System.Logger.Level.ERROR, "Error injecting into Fabric");
+                Lenis.LOG.log(Level.SEVERE, "Error injecting into Fabric");
             }
             return false;
         }

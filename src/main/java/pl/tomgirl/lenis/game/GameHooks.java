@@ -20,7 +20,8 @@ public final class GameHooks {
     private GameHooks() {}
 
     public static String getClipboard() {
-        return Objects.requireNonNullElse(SDLClipboard.SDL_GetClipboardText(), "");
+        String text = SDLClipboard.SDL_GetClipboardText();
+        return text == null ? "" : text;
     }
 
     public static void setClipboard(String text) {
@@ -40,7 +41,8 @@ public final class GameHooks {
                     pixels.put((byte) argb).put((byte) (argb >> 24));
                 }
             }
-            DisplaySdl.instance().setIcon(new ByteBuffer[] { pixels.flip() });
+            pixels.flip();
+            DisplaySdl.instance().setIcon(new ByteBuffer[] { pixels });
         } catch (IOException ex) {
             throw new IllegalStateException("Unable to load default icon", ex);
         }

@@ -5,6 +5,7 @@ import java.nio.IntBuffer;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
 
 import org.lwjgl.opengl.DisplayMode;
 import org.lwjgl.opengl.Drawable;
@@ -32,6 +33,7 @@ import static org.lwjgl.system.MemoryUtil.memAddress;
 public class DisplaySdl {
     private static final DisplaySdl INSTANCE = new DisplaySdl();
 
+    private boolean videoInitialized;
     private SDL_Event event;
     private SDL_WindowEvent windowEvent;
     private final Drawable drawable = new SurfaceDrawable();
@@ -214,7 +216,7 @@ public class DisplaySdl {
 
     @SuppressWarnings("resource")
     public DisplayMode getDesktopDisplayMode() {
-        var mode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
+        SDL_DisplayMode mode = SDL_GetDesktopDisplayMode(SDL_GetPrimaryDisplay());
         if (mode == null) {
             DisplayMode best = null;
             for (DisplayMode displayMode : getAvailableDisplayModes()) {
@@ -258,13 +260,13 @@ public class DisplaySdl {
         ByteBuffer pixels = MemoryUtil.memAlloc(icon.remaining());
         try {
             pixels.put(icon.duplicate()).flip();
-            try (var surface = SDLSurface.SDL_CreateSurfaceFrom(
+            try (SDL_Surface surface = SDLSurface.SDL_CreateSurfaceFrom(
                 size, size, SDLPixels.SDL_PIXELFORMAT_RGBA32, pixels, size * 4
             )) {
                 checkSdlError(surface != null);
                 checkSdlError(SDL_SetWindowIcon(handle, surface));
             } catch (Exception e) {
-                Lenis.LOG.log(System.Logger.Level.ERROR, "Failed to set window icon", e);
+                Lenis.LOG.log(Level.SEVERE, "Failed to set window icon", e);
             }
         } finally {
             MemoryUtil.memFree(pixels);
@@ -290,9 +292,14 @@ public class DisplaySdl {
         windowResized = false;
         while (SDL_PollEvent(event)) {
             switch (event.type()) {
-                case SDL_EVENT_QUIT, SDL_EVENT_WINDOW_CLOSE_REQUESTED -> closeRequested = true;
-                case SDL_EVENT_WINDOW_FOCUS_GAINED -> focused = true;
-                case SDL_EVENT_WINDOW_FOCUS_LOST -> {
+                case SDL_EVENT_QUIT:
+                case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+                    closeRequested = true;
+                    break;
+                case SDL_EVENT_WINDOW_FOCUS_GAINED:
+                    focused = true;
+                    break;
+                case SDL_EVENT_WINDOW_FOCUS_LOST: {
                     focused = false;
                     long nanos = windowEvent.timestamp();
                     if (Keyboard.isCreated()) {
@@ -301,32 +308,50 @@ public class DisplaySdl {
                     if (Mouse.isCreated()) {
                         MouseSdl.instance().releaseAll(nanos);
                     }
+                    break;
                 }
-                case SDL_EVENT_WINDOW_SHOWN, SDL_EVENT_WINDOW_RESTORED, SDL_EVENT_WINDOW_MAXIMIZED -> minimized = false;
-                case SDL_EVENT_WINDOW_HIDDEN, SDL_EVENT_WINDOW_MINIMIZED -> minimized = true;
-                case SDL_EVENT_WINDOW_RESIZED -> resizeCallback(handle, windowEvent.data1(), windowEvent.data2());
-                case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED ->
-                        onFramebufferResize(handle, windowEvent.data1(), windowEvent.data2());
-                case SDL_EVENT_WINDOW_ENTER_FULLSCREEN -> {
+                case SDL_EVENT_WINDOW_SHOWN:
+                case SDL_EVENT_WINDOW_RESTORED:
+                case SDL_EVENT_WINDOW_MAXIMIZED:
+                    minimized = false;
+                    break;
+                case SDL_EVENT_WINDOW_HIDDEN:
+                case SDL_EVENT_WINDOW_MINIMIZED:
+                    minimized = true;
+                    break;
+                case SDL_EVENT_WINDOW_RESIZED:
+                    resizeCallback(handle, windowEvent.data1(), windowEvent.data2());
+                    break;
+                case SDL_EVENT_WINDOW_PIXEL_SIZE_CHANGED:
+                    onFramebufferResize(handle, windowEvent.data1(), windowEvent.data2());
+                    break;
+                case SDL_EVENT_WINDOW_ENTER_FULLSCREEN:
                     fullscreen = true;
                     windowResized = true;
-                }
-                case SDL_EVENT_WINDOW_LEAVE_FULLSCREEN -> {
+                    break;
+                case SDL_EVENT_WINDOW_LEAVE_FULLSCREEN:
                     fullscreen = false;
                     windowResized = true;
-                }
-                case SDL_EVENT_KEY_DOWN, SDL_EVENT_KEY_UP, SDL_EVENT_TEXT_INPUT, SDL_EVENT_TEXT_EDITING,
-                     SDL_EVENT_TEXT_EDITING_CANDIDATES -> {
+                    break;
+                case SDL_EVENT_KEY_DOWN:
+                case SDL_EVENT_KEY_UP:
+                case SDL_EVENT_TEXT_INPUT:
+                case SDL_EVENT_TEXT_EDITING:
+                case SDL_EVENT_TEXT_EDITING_CANDIDATES:
                     if (Keyboard.isCreated()) {
                         KeyboardSdl.instance().processKeyboardEvent(event);
                     }
-                }
-                case SDL_EVENT_MOUSE_BUTTON_DOWN, SDL_EVENT_MOUSE_BUTTON_UP, SDL_EVENT_MOUSE_MOTION,
-                     SDL_EVENT_MOUSE_WHEEL, SDL_EVENT_WINDOW_MOUSE_ENTER, SDL_EVENT_WINDOW_MOUSE_LEAVE -> {
+                    break;
+                case SDL_EVENT_MOUSE_BUTTON_DOWN:
+                case SDL_EVENT_MOUSE_BUTTON_UP:
+                case SDL_EVENT_MOUSE_MOTION:
+                case SDL_EVENT_MOUSE_WHEEL:
+                case SDL_EVENT_WINDOW_MOUSE_ENTER:
+                case SDL_EVENT_WINDOW_MOUSE_LEAVE:
                     if (Mouse.isCreated()) {
                         MouseSdl.instance().processMouseEvent(event);
                     }
-                }
+                    break;
             }
         }
         Keyboard.poll();
@@ -339,9 +364,9 @@ public class DisplaySdl {
         }
     }
 
-    public void create(@NotNull GpuSurface fallbackSurface) throws LWJGLException {
-        if (isCreated()) {
-            throw new IllegalStateException("Display has already been created");
+    public synchronized void initializeVideo() {
+        if (videoInitialized) {
+            return;
         }
 
         SDL_SetMemoryFunctions(
@@ -362,8 +387,18 @@ public class DisplaySdl {
         checkSdlError(SDL_SetAppMetadataProperty(SDL_PROP_APP_METADATA_TYPE_STRING, "game"));
 
         if (!SDL_Init(SDL_INIT_VIDEO)) {
-            throw new IllegalStateException("Unable to initialize SDL" + SDL_GetError());
+            throw new IllegalStateException("Unable to initialize SDL: " + SDL_GetError());
         }
+
+        videoInitialized = true;
+    }
+
+    public void create(@NotNull GpuSurface fallbackSurface) throws LWJGLException {
+        if (isCreated()) {
+            throw new IllegalStateException("Display has already been created");
+        }
+
+        initializeVideo();
 
         GpuSurface surface = this.surface != null ? this.surface : fallbackSurface;
         this.surface = surface;
@@ -427,7 +462,7 @@ public class DisplaySdl {
             if (fullscreen) {
                 int display = SDL_GetPrimaryDisplay();
                 if (display == 0) {
-                    Lenis.LOG.log(System.Logger.Level.WARNING, "Failed to find display");
+                    Lenis.LOG.log(Level.WARNING, "Failed to find display");
                     return;
                 }
                 if (!this.fullscreen) {
@@ -442,7 +477,7 @@ public class DisplaySdl {
             SDL_SetWindowSize(handle, windowedWidth, windowedHeight);
             windowResized = true;
         } catch (Throwable t) {
-            Lenis.LOG.log(System.Logger.Level.WARNING, "Failed to set fullscreen: ", t);
+            Lenis.LOG.log(Level.WARNING, "Failed to set fullscreen: ", t);
         }
     }
 
@@ -456,7 +491,7 @@ public class DisplaySdl {
             return new DisplayMode[0];
         }
 
-        var buf = SDL_GetFullscreenDisplayModes(currDisplay);
+        PointerBuffer buf = SDL_GetFullscreenDisplayModes(currDisplay);
         if (buf == null) {
             throw new IllegalStateException("No display modes found");
         }
@@ -494,6 +529,7 @@ public class DisplaySdl {
             windowEvent = null;
         }
         SDL_Quit();
+        videoInitialized = false;
         try (MemoryStack stack = stackPush()) {
             PointerBuffer funcs = stack.mallocPointer(4);
 

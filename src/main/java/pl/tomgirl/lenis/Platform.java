@@ -3,6 +3,7 @@ package pl.tomgirl.lenis;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Locale;
+import java.util.logging.Level;
 
 public enum Platform {
     UNIX(),
@@ -29,13 +30,13 @@ public enum Platform {
             process.getErrorStream().close();
             process.getOutputStream().close();
         } catch (IOException e) {
-            Lenis.LOG.log(System.Logger.Level.ERROR, "Could not open uri " + uri, e);
+            Lenis.LOG.log(Level.SEVERE, "Could not open uri " + uri, e);
         }
     }
 
     protected String[] getProcessArguments(String uri) {
         try {
-            var parsed = new URI(uri);
+            URI parsed = new URI(uri);
             if ("file".equals(parsed.getScheme())) {
                 uri = uri.replace("file:", "file://");
             }

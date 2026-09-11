@@ -1,10 +1,12 @@
 package org.lwjgl.opengl;
 
 import java.nio.ByteBuffer;
+import java.util.logging.Level;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.LWJGLException;
+import pl.tomgirl.lenis.Lenis;
 import pl.tomgirl.lenis.window.GlSurface;
 import pl.tomgirl.lenis.window.DisplaySdl;
 
@@ -60,7 +62,12 @@ public class Display {
     }
 
     public static void create(@NotNull PixelFormat pixelFormat) throws LWJGLException {
-        SDL.create(new GlSurface(pixelFormat));
+        try {
+            SDL.create(new GlSurface(pixelFormat));
+        } catch (RuntimeException e) {
+            Lenis.LOG.log(Level.SEVERE, "Failed to create display", e);
+            throw new LWJGLException(e);
+        }
     }
 
     public static void setFullscreen(boolean fullscreen) {

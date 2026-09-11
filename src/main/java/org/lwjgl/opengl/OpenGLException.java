@@ -1,10 +1,7 @@
 package org.lwjgl.opengl;
 
-import java.io.Serial;
-
 @SuppressWarnings("unused")
 public class OpenGLException extends RuntimeException {
-    @Serial
     private static final long serialVersionUID = 1L;
 
     public OpenGLException(int gl_error_code) {

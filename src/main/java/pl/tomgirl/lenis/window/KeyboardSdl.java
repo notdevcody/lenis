@@ -2,7 +2,7 @@ package pl.tomgirl.lenis.window;
 
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Objects;
+import java.util.logging.Level;
 
 import pl.tomgirl.lenis.Lenis;
 import org.lwjgl.input.Keyboard;
@@ -85,20 +85,24 @@ public class KeyboardSdl {
 
     public void processKeyboardEvent(SDL_Event event) {
         switch (event.type()) {
-            case SDL_EVENT_KEY_DOWN, SDL_EVENT_KEY_UP -> {
+            case SDL_EVENT_KEY_DOWN:
+            case SDL_EVENT_KEY_UP: {
                 int key = translateKeyFromSDL(keyboardEvent.scancode());
                 byte state = keyboardEvent.down() ? (byte) 1 : 0;
                 if (key != Keyboard.KEY_NONE) {
                     this.keyDownBuffer[key] = state;
                 }
                 putKeyboardEvent(key, state, 0, keyboardEvent.timestamp(), keyboardEvent.repeat());
+                break;
             }
-            case SDL_EVENT_TEXT_INPUT ->
-                Objects.requireNonNullElse(textInputEvent.textString(), "")
-                    .chars()
-                    .forEach(character ->
-                        putKeyboardEvent(TEXT_EVENT_KEY, (byte) -1, character, textInputEvent.timestamp(), false)
-                    );
+            case SDL_EVENT_TEXT_INPUT: {
+                String text = textInputEvent.textString();
+                if (text == null) text = "";
+                text.chars().forEach(character ->
+                    putKeyboardEvent(TEXT_EVENT_KEY, (byte) -1, character, textInputEvent.timestamp(), false)
+                );
+                break;
+            }
         }
     }
 
@@ -108,7 +112,7 @@ public class KeyboardSdl {
         if (translated != Keymap.UNMAPPED) {
             return translated;
         }
-        Lenis.LOG.log(System.Logger.Level.WARNING, "Untranslated key: {0} ({1})", key, SDLKeyboard.SDL_GetScancodeName(key));
+        Lenis.LOG.log(Level.WARNING, "Untranslated key: {0} ({1})", new Object[]{key, SDLKeyboard.SDL_GetScancodeName(key)});
         return Keyboard.KEY_NONE;
     }
 

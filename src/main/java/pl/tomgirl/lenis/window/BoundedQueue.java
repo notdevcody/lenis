@@ -41,7 +41,7 @@ public class BoundedQueue<E> {
 
     E get(int index) {
         if (index < 0 || index >= size) {
-            throw new IndexOutOfBoundsException(index);
+            throw new IndexOutOfBoundsException(String.valueOf(index));
         }
         return entryAt(index);
     }

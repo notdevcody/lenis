@@ -3,6 +3,8 @@ package pl.tomgirl.lenis.window;
 import java.nio.ByteBuffer;
 
 import org.lwjgl.opengl.GL;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GLCapabilities;
 import org.lwjgl.opengl.PixelFormat;
 import org.lwjgl.sdl.SDLPlatform;
 import org.lwjgl.sdl.SDLVideo;
@@ -19,7 +21,7 @@ public class GlSurface implements GpuSurface {
     private long window;
     private long context;
     private boolean glInitialized;
-    private boolean capabilitiesCreated;
+    private GLCapabilities capabilities;
 
     public GlSurface(PixelFormat pixelFormat) {
         this.pixelFormat = pixelFormat;
@@ -55,8 +57,7 @@ public class GlSurface implements GpuSurface {
             Configuration.OPENGL_EXPLICIT_INIT.set(true);
             GL.create(SDLVideo::SDL_GL_GetProcAddress);
             glInitialized = true;
-            GL.createCapabilities(MemoryUtil::memCallocPointer);
-            capabilitiesCreated = true;
+            capabilities = GL.createCapabilities(MemoryUtil::memCallocPointer);
             return window;
         } catch (RuntimeException | Error throwable) {
             destroy();
@@ -79,12 +80,21 @@ public class GlSurface implements GpuSurface {
 
     @Override
     public void makeCurrent() {
+        if ("macOS".equals(SDLPlatform.SDL_GetPlatform())
+            && SDL_GL_GetCurrentContext() == context
+            && SDL_GL_GetCurrentWindow() == window
+            && GL11.glGetString(GL11.GL_VERSION) == null
+        ) {
+            check(SDL_GL_MakeCurrent(window, 0));
+        }
         check(SDL_GL_MakeCurrent(window, context));
+        GL.setCapabilities(capabilities);
     }
 
     @Override
     public void releaseCurrent() {
         check(SDL_GL_MakeCurrent(window, 0));
+        GL.setCapabilities(null);
     }
 
     @Override
@@ -101,10 +111,10 @@ public class GlSurface implements GpuSurface {
 
     @Override
     public void destroy() {
-        if (capabilitiesCreated) {
-            memFree(GL.getCapabilities().getAddressBuffer());
+        if (capabilities != null) {
+            memFree(capabilities.getAddressBuffer());
             GL.setCapabilities(null);
-            capabilitiesCreated = false;
+            capabilities = null;
         }
         if (glInitialized) {
             GL.destroy();

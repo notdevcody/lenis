@@ -74,7 +74,7 @@ public final class MinecraftPatch extends Patch {
         }
 
         if (screenCandidates.size() == 1) {
-            openScreen = screenCandidates.getFirst();
+            openScreen = screenCandidates.get(0);
         }
 
         return true;

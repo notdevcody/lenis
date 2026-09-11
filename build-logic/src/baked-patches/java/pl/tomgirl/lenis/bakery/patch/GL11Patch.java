@@ -40,6 +40,7 @@ public abstract class GL11Patch {
         GL11.glNormalPointer(0x1400, stride, pointer);
     }
 
+    @CompatStub("glGetBooleanv") private static void glGetBoolean(int pname, ByteBuffer params) {}
     @CompatStub("glGetFloatv") private static void glGetFloat(int pname, FloatBuffer params) {}
     @CompatStub("glGetIntegerv") private static void glGetInteger(int pname, IntBuffer params) {}
     @CompatStub("glFogfv") private static void glFog(int pname, FloatBuffer params) {}

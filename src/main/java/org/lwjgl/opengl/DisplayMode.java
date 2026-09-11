@@ -42,10 +42,11 @@ public final class DisplayMode {
     }
 
     public boolean equals(Object obj) {
-        if (!(obj instanceof DisplayMode dm)) {
+        if (!(obj instanceof DisplayMode)) {
             return false;
         }
 
+        DisplayMode dm = (DisplayMode) obj;
         return dm.width == width && dm.height == height && dm.bpp == bpp && dm.freq == freq;
     }
 

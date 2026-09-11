@@ -3,7 +3,9 @@ package pl.tomgirl.lenis.game;
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.logging.Level;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassVisitor;
@@ -24,7 +26,7 @@ public final class GameTransformer implements ClassFileTransformer {
         ClassReader reader = new ClassReader(bytecode);
         reader.accept(minecraft, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
 
-        List<Patch> matches = Stream.of(minecraft, screen).filter(Patch::matches).toList();
+        List<Patch> matches = Stream.of(minecraft, screen).filter(Patch::matches).collect(Collectors.toList());
         if (matches.isEmpty()) return bytecode;
 
         ClassWriter writer = new ClassWriter(reader, 0);
@@ -34,7 +36,7 @@ public final class GameTransformer implements ClassFileTransformer {
             patcher = patch.apply(patcher);
         }
         reader.accept(patcher, 0);
-        Lenis.LOG.log(System.Logger.Level.DEBUG, "Applied {0} to {1}", matches, reader.getClassName());
+        Lenis.LOG.log(Level.FINE, "Applied {0} to {1}", new Object[]{matches, reader.getClassName()});
         return writer.toByteArray();
     }
 }
