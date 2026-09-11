@@ -83,6 +83,17 @@ abstract class BakeLwjglTask : DefaultTask() {
             method.invisibleAnnotations?.removeIf { it.desc == STUB }
             target.methods.add(method)
         }
+        // forge workaround
+        if (target.name == "org/lwjgl/opengl/GL11") {
+            val getString = target.find("glGetString", "(I)Ljava/lang/String;") ?: error("Missing GL11.glGetString")
+            getString.instructions.insert(InsnList().apply {
+                add(MethodInsnNode(
+                    Opcodes.INVOKESTATIC, "org/lwjgl/opengl/GL", "getCapabilities",
+                    "()Lorg/lwjgl/opengl/GLCapabilities;", false,
+                ))
+                add(InsnNode(Opcodes.POP))
+            })
+        }
         if (target.name == "org/lwjgl/openal/AL") {
             val destroy = target.find("destroy", "()V") ?: error("Missing AL.destroy")
             destroy.access = destroy.access and (Opcodes.ACC_PRIVATE or Opcodes.ACC_PROTECTED).inv() or Opcodes.ACC_PUBLIC

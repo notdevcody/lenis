@@ -289,6 +289,10 @@ public class DisplaySdl {
     }
 
     public void processMessages() {
+        if (!SDL_IsMainThread()) {
+            return;
+        }
+
         windowResized = false;
         while (SDL_PollEvent(event)) {
             switch (event.type()) {
@@ -427,6 +431,9 @@ public class DisplaySdl {
         Keyboard.create();
         checkSdlError(SDL_ShowWindow(handle));
         checkSdlError(SDL_RaiseWindow(handle));
+        if (SDL_IsMainThread()) {
+            SDL_PumpEvents();
+        }
         focused = (SDL_GetWindowFlags(handle) & SDL_WINDOW_INPUT_FOCUS) != 0;
         updateTextInputState();
         if (cachedIcons != null) {
@@ -450,6 +457,10 @@ public class DisplaySdl {
             this.framebufferHeight = framebufferHeight;
             windowResized = true;
         }
+    }
+
+    public boolean isFullscreen() {
+        return this.fullscreen;
     }
 
     public void setFullscreen(boolean fullscreen) {
@@ -599,6 +610,11 @@ public class DisplaySdl {
     }
 
     private final class SurfaceDrawable implements Drawable {
+        @Override
+        public boolean isCurrent() {
+            return false;
+        }
+
         @Override
         public void makeCurrent() {
             DisplaySdl.this.makeCurrent();

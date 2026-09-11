@@ -70,6 +70,10 @@ public class Display {
         }
     }
 
+    public static boolean isFullscreen() {
+        return SDL.isFullscreen();
+    }
+
     public static void setFullscreen(boolean fullscreen) {
         SDL.setFullscreen(fullscreen);
     }
@@ -85,6 +89,15 @@ public class Display {
 
     public static boolean isCreated() {
         return SDL.isCreated();
+    }
+
+    public static boolean isCurrent() {
+        try {
+            return SDL.getDrawable().isCurrent();
+        } catch (LWJGLException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     public static boolean isActive() {
