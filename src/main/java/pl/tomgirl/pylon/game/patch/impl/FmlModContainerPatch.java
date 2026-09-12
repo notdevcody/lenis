@@ -18,7 +18,7 @@ public class FmlModContainerPatch extends Patch {
     public void visit(int version, int access, String name, String signature, String parent, String[] interfaces) {
         owner = name;
         if (name.equals("net/minecraftforge/fml/common/Loader")) {
-            container = "pl.tomgirl.pylonfml.PylonModContainer";
+            container = "pl.tomgirl.pylonfml.FmlModContainer";
         } else if (name.equals("cpw/mods/fml/common/Loader")) {
             container = "pl.tomgirl.pylonfml.CpwModContainer";
         }
