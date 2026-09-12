@@ -21,12 +21,13 @@ public final class GameTransformer implements ClassFileTransformer {
     }
 
     public static byte[] transform(byte[] bytecode) {
-        ScreenPatch screen = new ScreenPatch(null);
+        FmlModContainerPatch fml = new FmlModContainerPatch(null);
+        ScreenPatch screen = new ScreenPatch(fml);
         MinecraftPatch minecraft = new MinecraftPatch(screen);
         ClassReader reader = new ClassReader(bytecode);
         reader.accept(minecraft, ClassReader.SKIP_DEBUG | ClassReader.SKIP_FRAMES);
 
-        List<Patch> matches = Stream.of(minecraft, screen).filter(Patch::matches).collect(Collectors.toList());
+        List<Patch> matches = Stream.of(minecraft, screen, fml).filter(Patch::matches).collect(Collectors.toList());
         if (matches.isEmpty()) return bytecode;
 
         ClassWriter writer = new ClassWriter(reader, 0);

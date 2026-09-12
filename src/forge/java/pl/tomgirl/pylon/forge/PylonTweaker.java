@@ -38,6 +38,7 @@ public final class PylonTweaker implements ITweaker {
         }
 
         classLoader.addClassLoaderExclusion("pl.tomgirl.pylon.");
+        classLoader.addTransformerExclusion("pl.tomgirl.pylonfml.");
         classLoader.registerTransformer(PylonTransformer.class.getName());
     }
 
@@ -77,6 +78,7 @@ public final class PylonTweaker implements ITweaker {
     @Override
     public String[] getLaunchArguments() {
         classLoader.addClassLoaderExclusion("org.lwjgl.");
+        OldFmlCompat.prepare(classLoader);
         return new String[0];
     }
 }

@@ -86,7 +86,7 @@ class PylonBuildPlugin : Plugin<Project> {
 
         tasks.named<ProcessResources>("processResources") {
             inputs.property("version", version)
-            filesMatching("fabric.mod.json") {
+            filesMatching(listOf("fabric.mod.json", "mcmod.info")) {
                 expand("version" to project.version)
             }
         }
@@ -98,6 +98,7 @@ class PylonBuildPlugin : Plugin<Project> {
             destinationDirectory.set(layout.buildDirectory.dir("intermediates"))
             manifest.attributes(
                 "Premain-Class" to "pl.tomgirl.pylon.Agent",
+                "Implementation-Version" to project.version.toString(),
                 "TweakClass" to "pl.tomgirl.pylon.forge.PylonTweaker",
             )
         }
@@ -121,6 +122,7 @@ class PylonBuildPlugin : Plugin<Project> {
             destinationDirectory.set(layout.buildDirectory.dir("intermediates"))
             manifest.attributes(
                 "Premain-Class" to "pl.tomgirl.pylon.Agent",
+                "Implementation-Version" to project.version.toString(),
                 "TweakClass" to "pl.tomgirl.pylon.forge.PylonTweaker",
                 "Multi-Release" to "true",
             )

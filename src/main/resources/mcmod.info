@@ -1,0 +1,14 @@
+[{
+  "modid": "pylon",
+  "name": "Pylon",
+  "description": "LWJGL3 compatibility layer for legacy Minecraft.",
+  "version": "${version}",
+  "mcversion": "*",
+  "url": "https://github.com/notdevcody/pylon",
+  "authors": [ "notdevcody" ],
+  "credits": "",
+  "logoFile": "/assets/pylon/icon.png",
+  "parent": "",
+  "screenshots": [],
+  "dependencies": []
+}]
