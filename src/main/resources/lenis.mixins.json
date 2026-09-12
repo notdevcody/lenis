@@ -1,5 +1,0 @@
-{
-  "required": true,
-  "compatibilityLevel": "JAVA_8",
-  "plugin": "pl.tomgirl.lenis.fabric.MixinPlugin"
-}

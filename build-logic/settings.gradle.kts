@@ -1,1 +1,1 @@
-rootProject.name = "lenis-build-logic"
+rootProject.name = "pylon-build-logic"

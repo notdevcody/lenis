@@ -15,9 +15,9 @@ dependencies {
 
 gradlePlugin {
     plugins {
-        create("lenisBuild") {
-            id = "lenis.build"
-            implementationClass = "pl.tomgirl.lenis.build.LenisBuildPlugin"
+        create("pylonBuild") {
+            id = "pylon.build"
+            implementationClass = "pl.tomgirl.pylon.build.PylonBuildPlugin"
         }
     }
 }

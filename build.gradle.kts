@@ -1,3 +1,3 @@
 plugins {
-    id("lenis.build")
+    id("pylon.build")
 }

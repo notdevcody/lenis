@@ -1,6 +1,6 @@
 package org.lwjgl;
 
-import pl.tomgirl.lenis.Platform;
+import pl.tomgirl.pylon.Platform;
 
 @SuppressWarnings("unused")
 public class Sys {

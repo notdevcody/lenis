@@ -7,6 +7,6 @@ pluginManagement {
     }
 }
 
-rootProject.name = "lenis"
+rootProject.name = "pylon"
 
 include(":runs:fabric", ":runs:vanilla")

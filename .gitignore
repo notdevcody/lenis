@@ -1,6 +1,7 @@
 .gradle
 .DS_Store
 .idea/
+.kotlin/
 build/
-!**/tomgirl/lenis/build
+!**/tomgirl/pylon/build
 run/

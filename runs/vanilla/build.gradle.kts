@@ -2,11 +2,11 @@ plugins {
     alias(libs.plugins.loom)
 }
 
-val lenis = configurations.create("lenis")
+val pylon = configurations.create("pylon")
 
 dependencies {
     minecraft("com.mojang:minecraft:1.6.4")
-    lenis(project(path = ":", configuration = "distribution"))
+    pylon(project(path = ":", configuration = "distribution"))
     runtimeOnly(project(path = ":", configuration = "distribution"))
 }
 
@@ -31,7 +31,7 @@ loom {
             mainClass = "net.minecraft.client.main.Main"
             displayName = "Vanilla 1.6.4 (agent)"
             runDirectory = layout.projectDirectory.dir("run/agent")
-            jvmArguments.add(provider { "-javaagent:${lenis.singleFile.absolutePath}" })
+            jvmArguments.add(provider { "-javaagent:${pylon.singleFile.absolutePath}" })
         }
         configureEach {
             generateRunConfig = true

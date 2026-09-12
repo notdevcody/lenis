@@ -1,13 +1,11 @@
-<img alt="Lenis logo" src="src/main/resources/assets/lenis/icon.png" width="128px" />
+<img alt="Pylon logo" src="src/main/resources/assets/pylon/icon.png" width="128px" />
 
-# Lenis
-Lenis allows legacy Minecraft versions to run with LWJGL 3. It replaces the outdated windowing system with SDL 3, and serves as a library for mods.
-
-Currently only 1.8.9 on Ornithe is supported, with support for more versions coming soon.
+# Pylon
+Pylon allows legacy Minecraft versions to run with LWJGL 3. It replaces the outdated windowing system with SDL 3, and serves as a library for mods.
 
 ## Downloads
-* [Latest Release](https://github.com/notdevcody/lenis/releases/latest)
-* [Latest Nightly](https://nightly.link/notdevcody/lenis/workflows/nightly/main/lenis-nightly.zip)
+* [Latest Release](https://github.com/notdevcody/pylon/releases/latest)
+* [Latest Nightly](https://nightly.link/notdevcody/pylon/workflows/nightly/main/pylon-nightly.zip)
 
 ## Features
 ### Fixes
@@ -24,13 +22,13 @@ Currently only 1.8.9 on Ornithe is supported, with support for more versions com
 - Better fullscreen and window resizing
 
 ## Developers
-Lenis is published to the Clover Client Maven, and can be added as a dependency like so:
+Pylon is published to the Clover Client Maven, and can be added as a dependency like so:
 ```kts
 repositories {
     maven("https://maven.cloverclient.com/releases")
 }
 
 dependencies {
-    modImplementation("pl.tomgirl:lenis:${version}")
+    modImplementation("pl.tomgirl:pylon:${version}")
 }
 ```

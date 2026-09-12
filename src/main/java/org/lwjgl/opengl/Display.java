@@ -6,9 +6,9 @@ import java.util.logging.Level;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.lwjgl.LWJGLException;
-import pl.tomgirl.lenis.Lenis;
-import pl.tomgirl.lenis.window.GlSurface;
-import pl.tomgirl.lenis.window.DisplaySdl;
+import pl.tomgirl.pylon.Pylon;
+import pl.tomgirl.pylon.window.GlSurface;
+import pl.tomgirl.pylon.window.DisplaySdl;
 
 @SuppressWarnings("unused")
 public class Display {
@@ -65,7 +65,7 @@ public class Display {
         try {
             SDL.create(new GlSurface(pixelFormat));
         } catch (RuntimeException e) {
-            Lenis.LOG.log(Level.SEVERE, "Failed to create display", e);
+            Pylon.LOG.log(Level.SEVERE, "Failed to create display", e);
             throw new LWJGLException(e);
         }
     }

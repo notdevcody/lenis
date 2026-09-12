@@ -1,19 +1,19 @@
 {
   "schemaVersion": 1,
-  "id": "lenis",
+  "id": "pylon",
   "version": "${version}",
-  "name": "Lenis",
-  "icon": "assets/lenis/icon.png",
+  "name": "Pylon",
+  "icon": "assets/pylon/icon.png",
   "authors": [ "notdevcody" ],
   "license": "LGPL-3.0-only",
   "environment": "client",
   "entrypoints": {
     "preLaunch": [
-      "pl.tomgirl.lenis.fabric.PreLaunch"
+      "pl.tomgirl.pylon.fabric.PreLaunch"
     ]
   },
   "mixins": [
-    "lenis.mixins.json"
+    "pylon.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=0.17.3",

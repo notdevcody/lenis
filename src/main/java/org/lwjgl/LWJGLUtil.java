@@ -1,6 +1,6 @@
 package org.lwjgl;
 
-import pl.tomgirl.lenis.Platform;
+import pl.tomgirl.pylon.Platform;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
